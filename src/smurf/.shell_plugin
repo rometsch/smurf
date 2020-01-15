@@ -1,0 +1,40 @@
+# change to the simdir
+function smurfcd () {
+		IFS="" DIRS="$(smurf search -p path $@)"
+		unset IFS
+		if [[ "$(echo $DIRS | wc -l | tr -d '[ ]')" == "1" ]]; then
+			rcd "$DIRS"
+		else
+			echo "$DIRS"
+		fi
+}
+
+function rcd () {
+	# ssh into a host and cd to a directory
+	# syntax is the same as for scp:
+	# host:path/to/dir
+	if [[ -z "$1" ]]; then
+		return
+	elif [[ "$#" > 1 ]]; then
+		>&2 echo "Too many arguments!"
+		return
+	fi
+	# split destination string
+	FIRST="$(echo $1 | awk '{split($0,a,":"); print a[1]}')"
+	SECOND="$(echo $1 | awk '{split($0,a,":"); print a[2]}')"
+	if [[ -n "$FIRST" && -z "$SECOND" ]]; then
+		if [ -d "$FIRST" ]; then
+			cd "$FIRST"
+		fi
+	elif [[ -n "$FIRST" && -n "$SECOND" ]]; then
+		HOST="$FIRST"
+		DIR="$SECOND"
+		ssh -t $HOST "cd $DIR ; \$SHELL -l"
+	else
+		>&2 echo "Invalid syntax!"
+	fi
+}
+
+alias scd='smurfcd'
+
+source ~/.smurf/.shell_completion
