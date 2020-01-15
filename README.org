@@ -48,7 +48,7 @@ For this *smurf find* can be used.
 
 Additionally to the concept of simulation directories, I use the concept of project directories.
 These are indicated by a *.project* file which contains the name of the project.
-This file also serves for a way to find the project root directory walking up the directory tree until this file is found. (*smurf project_root*).
+This file also serves for a way to find the project root directory walking up the directory tree until this file is found. (*smurf project root*).
 
 
 ** ideas for improvements
