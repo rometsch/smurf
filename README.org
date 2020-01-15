@@ -1,0 +1,69 @@
+#+title: smurf
+
+A tool for managing numerical simulations across multiple compute hosts.
+
+** Setup
+
+To install =smurf= on your computer or server, follow these steps:
+1. Make sure you have installed all the requirements listed below.
+2. Clone this repository.
+3. Navigate to the repository in your terminal and run
+#+begin_src sh
+python3 setup.py install --user
+#+end_src
+
+This installs the python packages and creates a wrapper to call it from the command line. Try it by running the command
+#+begin_src sh
+smurf
+#+end_src
+If you get an error saying that the command can't be found, make sure that =~/.local/bin= is in your =PATH= variable (=echo $PATH | grep ~/.local/bin= should produce some output).
+You can add it by running
+#+begin_src sh
+export PATH="$PATH:$HOME/.local/bin"
+#+end_src
+and adding the same line in your =.bashrc/.zshrc= file.
+
+To install the bash/zsh integration to use the tab completion, run
+#+begin_src sh
+smurf enable_shell_plugin
+#+end_src
+and follow the instructions to activate it and add it to your =.bashrc/.zshrc= file.
+
+*** Requirements
+
++ =python3=
++ python3's =setuptools= package
+
+** Basic idea and requirements
+
+For each simulation I run, I store the complete source code, the config files and the binary and the output data in one single directory.
+I refer to this as the simulation directory (simdir).
+Alongside all the required code and data, I store meta data and scripts to run/build/queue the simulation in a directory called *job* inside the simdir.
+Usually, the simdir's name indicates some of the simulations parameters.
+
+Each simulation also gets its own [[https://en.wikipedia.org/wiki/Universally_unique_identifier][uuid]], such that it can be located.
+This uuid is stored inside *{simdir}/job/uuid/{the uuid}* as a file with the uuid as its filename.
+That way, its extremely easy to locate the simdir of a simulation given its uuid by using unix find or locate.
+For this *smurf find* can be used.
+
+Additionally to the concept of simulation directories, I use the concept of project directories.
+These are indicated by a *.project* file which contains the name of the project.
+This file also serves for a way to find the project root directory walking up the directory tree until this file is found. (*smurf project_root*).
+
+
+** ideas for improvements
+
++ Somehow store and keep up to date a database (e.g. mysql) of simulations using uuid identifiers.
++ Update state of simulations regularly, e.g. by using cron jobs on each compute server/cluster and react on filesystem changes or update regularly.
++ Have a tool to list and search simulation parameters.
+
+*** TODO define meta information version
+
+Define a structure for the meta information and add an identifier to the meta dir to make it detectable.
+Define which information is where and add versioning.
+
+*** Misc improvement ideas
++ smurf info add set/add command for fields
++ create .local/bin if not present and make sure its in PATH
++ smurf info list index out of range for empty meta or uuid dir
++ smurf info rename 'what' to 'choise'
