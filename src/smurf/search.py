@@ -222,6 +222,9 @@ def search_global(patterns, verbose=False, exclusive=False, remote_cache=None):
     c = cache.RemoteSimCache() if remote_cache is None else remote_cache
     for sim in rv:
         c.add_sim_to_cache(sim)
+    if len(rv) == 0:
+        c = cache.LocalSimCache()
+        rv = c.search(patterns)
     return rv
 
 
