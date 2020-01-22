@@ -4,7 +4,7 @@
 # to transparently get a data object without manually
 # looking up simulation dir paths.
 
-from smurf.search import remote_path
+from smurf.search import remote_path, search
 from smurf.cache import get_cache_by_id
 from .mount import Mount
 import simdata.data
@@ -31,14 +31,9 @@ class RemoteData(simdata.data.Data):
 class Data(RemoteData):
     # data loader with smurf support to locate remote simulations
     # and mount them via sshfs
-    def __init__(self, simid, search_remote=True, search_args=None, **kwargs):
-        self.sim = smurf_global_lookup(simid,
-                                       remote=search_remote,
-                                       search_args=search_args)
-        if self.sim["host"] != "localhost":
-            path = "{}:{}".format(self.sim["host"], self.sim["path"])
-        else:
-            path = self.sim["path"]
+    def __init__(self, simid, search_remote=True, search_args={}, **kwargs):
+        self.sim = search(simid, remote=search_remote, unique=True, **search_args)[0]
+        path = remote_path(self.sim)
         if "simdata_code" in self.sim:
             kwargs["loader"] = self.sim["simdata_code"]
         elif "simcode" in self.sim:
@@ -53,25 +48,3 @@ class Data(RemoteData):
 def is_local_path(path):
     """ Evaluate whether 'path' is not of the form host:path. """
     return len(path.split(":")) < 2
-
-
-def smurf_global_lookup(pattern, remote=True, search_args=None):
-    try:
-        from smurf.search import search
-        try:
-            if search_args is None:
-                search_args = {}
-            rv = search(pattern, remote=remote, **search_args)
-            # use the first match
-            if len(rv) == 0:
-                raise KeyError(
-                    "Could not locate simulation for pattern : '{}'".format(
-                        pattern))
-            return rv[0]
-
-        except Exception as e:
-            print("Smurf lookup failed with exception: {}".format(e))
-            raise
-    except ImportError:
-        print("Smurf is not installed on this maschine!")
-        return {}
