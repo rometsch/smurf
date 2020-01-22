@@ -44,10 +44,13 @@ def main():
     if args.rebuild:
         c.rebuild()
 
-    res = c.search(args.patterns,
-                   fields=sim_attributes,
-                   unique=False,
-                   exclusive=args.exclusive_search)
+    if len(args.patterns) == 0:
+        res = c.data
+    else:
+        res = c.search(args.patterns,
+                       fields=sim_attributes,
+                       unique=False,
+                       exclusive=args.exclusive_search)
 
     if args.unique:
         if len(res) == 1:
@@ -79,7 +82,6 @@ def parse_command_line_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("patterns",
                         nargs="*",
-                        default=".",
                         help="What to search for.")
     parser.add_argument("-p",
                         "--print",
