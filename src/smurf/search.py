@@ -110,7 +110,7 @@ def search(patterns,
     patterns : sequence
         A list containing patterns to search for.
     unique : bool
-        Through an exception if result is not unique.
+        Throw an exception if there is more than one result.
     remote : bool
         Search remote hosts if True, else only search local.
     force_global : bool
