@@ -126,14 +126,14 @@ def search(patterns,
     patterns = ensure_list(patterns)
     rv = search_local_cache(patterns,
                             fields=cache.sim_attributes,
-                            unique=unique,
+                            unique=False,
                             exclusive=exclusive)
     try:
         c = cache.RemoteSimCache()
         if len(rv) == 0 and remote and not force_global:
             rv = search_remote_cache(patterns,
                                      fields=cache.sim_attributes,
-                                     unique=unique,
+                                     unique=False,
                                      exclusive=exclusive)
         if ensure_exist:
             to_del = []
@@ -149,6 +149,11 @@ def search(patterns,
                                remote_cache=c)
     except KeyError:
         pass
+    if len(rv) > 1 and unique:
+        from smurf.cache import ResultNotUniqueError
+        raise ResultNotUniqueError(
+            "Search result is not unique! {} results found.".format(
+                len(rv)))
     return rv
 
 
