@@ -32,7 +32,10 @@ class Data(RemoteData):
     # data loader with smurf support to locate remote simulations
     # and mount them via sshfs
     def __init__(self, simid, search_remote=True, search_args={}, **kwargs):
-        self.sim = search(simid, remote=search_remote, unique=True, **search_args)[0]
+        self.sim = search(simid,
+                          remote=search_remote,
+                          unique=True,
+                          **search_args)[0]
         path = remote_path(self.sim)
         if "simdata_code" in self.sim:
             kwargs["loader"] = self.sim["simdata_code"]

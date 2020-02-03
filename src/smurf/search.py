@@ -26,8 +26,7 @@ def main():
             else:
                 print(sim[args.print])
     else:
-        import pprint
-        pprint.pprint(rv)
+        print_table(rv)
 
 
 def parse_command_line_args():
@@ -66,6 +65,22 @@ def parse_command_line_args():
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     return args
+
+
+def print_table(info_list):
+    """ Print a formatted table of the given info dict objects.
+
+    Parameters
+    ----------
+    info_list : list
+        List containing info dicts.
+    """
+    fields = [("uuid", 8), ("host", 15), ("name", 40)]
+    for info in info_list:
+        s = ""
+        for f, l in fields:
+            s += ("{:" + str(l) + "s}\t").format(info[f][:l])
+        print(s)
 
 
 def remote_path(sim):
