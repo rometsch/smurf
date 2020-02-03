@@ -167,8 +167,7 @@ def search(patterns,
     if len(rv) > 1 and unique:
         from smurf.cache import ResultNotUniqueError
         raise ResultNotUniqueError(
-            "Search result is not unique! {} results found.".format(
-                len(rv)))
+            "Search result is not unique! {} results found.".format(len(rv)))
     return rv
 
 

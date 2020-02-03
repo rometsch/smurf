@@ -80,9 +80,7 @@ sim_attributes = ["uuid", "name", "tags", "simcode", "path"]
 def parse_command_line_args():
     import argparse, argcomplete
     parser = argparse.ArgumentParser()
-    parser.add_argument("patterns",
-                        nargs="*",
-                        help="What to search for.")
+    parser.add_argument("patterns", nargs="*", help="What to search for.")
     parser.add_argument("-p",
                         "--print",
                         choices=sim_attributes,
