@@ -9,7 +9,7 @@ setup(
     author_email="thomas.rometsch@uni-tuebingen.de",
     url="https://github.com/rometsch/smurf",
     package_dir={'': 'src'},
-    package_data = { "" : ["*.sh", ".shell*"] },
+    package_data = { "" : ["*.sh", "shell*"] },
     packages=find_namespace_packages(where="src"),
     install_requires=[
         'argcomplete',
