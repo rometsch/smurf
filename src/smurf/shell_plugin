@@ -37,4 +37,4 @@ function rcd () {
 
 alias scd='smurfcd'
 
-source ~/.smurf/.shell_completion
+source ~/.smurf/shell_completion
