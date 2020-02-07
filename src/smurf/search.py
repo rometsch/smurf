@@ -18,7 +18,7 @@ def main():
 
     if args.json:
         import json
-        print(json.dumps(rv))
+        print(json.dumps(rv, indent=4))
     elif args.print:
         for sim in rv:
             if args.print == "path":
