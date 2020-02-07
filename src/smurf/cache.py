@@ -40,62 +40,30 @@ def main():
             RemoteSimCache().remove(args.remove)
         except KeyError:
             pass
+        return
 
-    if args.rebuild:
+    if args.generate:
         c.rebuild()
 
-    if len(args.patterns) == 0:
-        res = c.data
-    else:
-        res = c.search(args.patterns,
-                       fields=sim_attributes,
-                       unique=False,
-                       exclusive=args.exclusive_search)
-
-    if args.unique:
-        if len(res) == 1:
-            if args.print:
-                rv = [res[0][args.print]]
+    if args.list:
+        data = [x for x in c.data.values()]
+        if args.json:
+            print(json.dumps(data, indent=4))
         else:
-            rv = res
-    else:
-        if args.print:
-            rv = [r[args.print] for r in res]
-        else:
-            rv = res
-    if args.json:
-        print(json.dumps(rv))
-    else:
-        for r in rv:
-            if isinstance(r, str):
-                print(r)
-            else:
-                import pprint
-                pprint.pprint(r)
+            from smurf.search import print_table
+            print_table(data)
 
 
-sim_attributes = ["uuid", "name", "tags", "simcode", "path"]
+sim_attributes = ["uuid", "name", "tags", "simcode", "path", "host"]
 
 
 def parse_command_line_args():
     import argparse, argcomplete
     parser = argparse.ArgumentParser()
-    parser.add_argument("patterns", nargs="*", help="What to search for.")
-    parser.add_argument("-p",
-                        "--print",
-                        choices=sim_attributes,
-                        help="Property to show.")
-    parser.add_argument("--search-fields",
-                        choices=sim_attributes,
-                        nargs="+",
-                        default=sim_attributes,
-                        help="Properties to search.")
-    parser.add_argument("-e",
-                        "--exclusive-search",
-                        default=False,
-                        action="store_true",
-                        help="""All given pattern must
-                        match a valid search result.""")
+    parser.add_argument("patterns",
+                        default=[os.getcwd()],
+                        nargs="*",
+                        help="What to search for.")
     parser.add_argument("-u",
                         "--unique",
                         default=False,
@@ -105,8 +73,8 @@ def parse_command_line_args():
                         default=False,
                         action="store_true",
                         help="Output as json.")
-    parser.add_argument("-r",
-                        "--rebuild",
+    parser.add_argument("-g",
+                        "--generate",
                         default=False,
                         action="store_true",
                         help="Force (re)generation of the cache.")
@@ -120,7 +88,12 @@ def parse_command_line_args():
                         default=False,
                         action="store_true",
                         help="Notify the cache about a simulation.")
-    parser.add_argument("--remove",
+    parser.add_argument("--list",
+                        default=False,
+                        action="store_true",
+                        help="List all cached items.")
+    parser.add_argument("-r",
+                        "--remove",
                         help="Remove simulation with given id from cache.")
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
