@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Initialize a simdir
 import os
 from smurf.info import is_simdir, Info

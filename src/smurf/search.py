@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import smurf.cache as cache
 import smurf
 import subprocess

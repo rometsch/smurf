@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Caller for scripts in the smurf package
 import os, sys
 from subprocess import run

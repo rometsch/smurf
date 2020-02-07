@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Config structure for smurf.
 import os
 import sys

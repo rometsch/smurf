@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Obtain information about the simulation of the given path
 import os
 import sys

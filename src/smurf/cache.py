@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Generate a database with simdirs and uuids in the project root
 import os
 import sys

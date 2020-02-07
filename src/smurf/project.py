@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # find the root folder of the project indicated by a .project file containing the projects name
 import os
 import sys
