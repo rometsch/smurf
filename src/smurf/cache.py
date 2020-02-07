@@ -64,11 +64,6 @@ def parse_command_line_args():
                         default=[os.getcwd()],
                         nargs="*",
                         help="What to search for.")
-    parser.add_argument("-u",
-                        "--unique",
-                        default=False,
-                        action="store_true",
-                        help="Only print a unique result.")
     parser.add_argument("--json",
                         default=False,
                         action="store_true",
