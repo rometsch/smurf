@@ -6,7 +6,7 @@ import json
 
 home_path = os.path.join(os.path.expanduser("~"), ".smurf")
 
-information_types = ["rootdir", "host", "web_host"]
+information_types = ["rootdir", "host"]
 
 
 def main():
