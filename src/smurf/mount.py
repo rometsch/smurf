@@ -10,8 +10,9 @@ from uuid import uuid4
 
 
 class Mount:
-    def __init__(self, remote):
+    def __init__(self, remote, cache_timeout=None):
         self.remote = remote
+        self.cache_timeout = cache_timeout
         self.mount_uuid = str(uuid4())
         self.mount()
 
@@ -33,7 +34,10 @@ class Mount:
         self.tempdir = Path(mkdtemp(prefix="smurf-"))
         os.mkdir(self.tempdir / "active")
         os.mkdir(self.get_path())
-        mount_sshfs(self.remote, self.get_path(), remove=True)
+        mount_sshfs(self.remote,
+                    self.get_path(),
+                    remove=True,
+                    cache_timeout=self.cache_timeout)
 
     def flag_active(self):
         """ Flag the mount point to be in use. """
@@ -81,20 +85,18 @@ class Mount:
         os.rmdir(self.tempdir)
 
 
-def mount_sshfs(remote, local, remove=True):
+def mount_sshfs(remote, local, remove=True, cache_timeout=None):
     # mount a remote location to a local directory using sshfs
-    timeout = "600"
+    if cache_timeout is None:
+        cache_timeout = 120
+    timeout = str(cache_timeout)
     run([
-        "sshfs",
-        "-o",
-        "ro",
-        "-o",
-        "kernel_cache",
-        #"-o", "cache_timeout="+timeout,
-        #"-o", "entry_timeout="+timeout,
-        #"-o", "attr_timeout="+timeout,
-        remote,
-        local
+        "sshfs", "-o", "ro", "-o", "kernel_cache", "-o", "cache=yes", "-o",
+        "cache_timeout=" + timeout, "-o", "cache_stat_timeout=" + timeout,
+        "-o", "cache_dir_timeout=" + timeout, "-o",
+        "cache_link_timeout=" + timeout, "-o", "entry_timeout=" + timeout,
+        "-o", "attr_timeout=" + timeout, "-o", "ac_attr_timeout=" + timeout,
+        remote, local
     ])
 
 
