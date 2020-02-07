@@ -77,7 +77,7 @@ class Config:
         check_information_type(what)
         if what == "rootdir":
             self.add_rootdir(val)
-        if what == "host":
+        elif what == "host":
             list_name = what + "_list"
             if not list_name in self.data:
                 self.data[list_name] = []
