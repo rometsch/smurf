@@ -1,5 +1,5 @@
 # bash completion
-_SMURF_SCRIPT_DIR="$(cat ~/.smurf/.script_dir.txt)"
+_SMURF_SCRIPT_DIR="$(cat ~/.smurf/script_dir.txt)"
 _SMURF_SUBCOMMANDS=$(python3 -c "import smurf._command_line_; print(' '.join(smurf._command_line_.available_scripts()))")
 _SMURF_SUBCOMMANDS_FILES=$(python3 -c "import smurf._command_line_; print(' '.join(smurf._command_line_.available_scripts(filenames=True)))")
 
