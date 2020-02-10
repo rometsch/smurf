@@ -196,7 +196,7 @@ def search_remote(args):
     verbose = args[2]
     exclusive = args[3]
     try:
-        command = ["ssh", host, "$HOME/.local/bin/smurf", "cache", "--json"
+        command = ["ssh", host, "$HOME/.local/bin/smurf", "search", "--local", "--json"
                    ] + patterns
         if exclusive:
             command += ["-e"]
