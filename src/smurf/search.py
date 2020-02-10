@@ -13,6 +13,7 @@ def main():
     rv = search(args.patterns,
                 unique=args.unique,
                 exclusive=args.exclusive_search,
+                remote=not args.local,
                 force_global=args.g)
 
     if args.json:
@@ -37,6 +38,10 @@ def parse_command_line_args():
                         default=False,
                         action="store_true",
                         help="Force searching all known hosts")
+    parser.add_argument("--local",
+                        default=False,
+                        action="store_true",
+                        help="Force searching only the local cache.")
     parser.add_argument("-p",
                         "--print",
                         choices=cache.sim_attributes,
@@ -144,19 +149,19 @@ def search(patterns,
                             exclusive=exclusive)
     try:
         c = cache.RemoteSimCache()
-        if len(rv) == 0 and remote and not force_global:
+        if (len(rv) == 0) and remote and (not force_global):
             rv = search_remote_cache(patterns,
                                      fields=cache.sim_attributes,
                                      unique=False,
                                      exclusive=exclusive)
-        if ensure_exist:
-            to_del = []
-            for n, s in enumerate(rv):
-                if not exists_remote(sim):
-                    to_del.append(n)
-            for k, n in enumerate(to_del):
-                del rv[n - k]
-        if len(rv) == 0 or force_global:
+            if ensure_exist:
+                to_del = []
+                for n, s in enumerate(rv):
+                    if not exists_remote(sim):
+                        to_del.append(n)
+                for k, n in enumerate(to_del):
+                    del rv[n - k]
+        if (len(rv) == 0 and remote) or force_global:
             rv = search_global(patterns,
                                verbose=verbose,
                                exclusive=exclusive,
