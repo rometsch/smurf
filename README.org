@@ -1,18 +1,119 @@
 #+title: smurf
 
 A tool for managing numerical simulations across multiple compute hosts.
+But nothing stops you to use it to use it for any directory on any of your computers you want to find by id or name.
+In that case, mentally substitute =simulation= for =stuff= in this file.
+
+** Quick Guide
+
+*** What's in for me?
+
+With only the name or id of a simulations, get any or all of the following three without manual work:
++ find the simulations on any host : =smurf search {id or name}=
++ instantly get a shell at the directory of your simulation on any host : =scd {id or name}=
++ mount the data onto your local machine (python3): =m = smurf.mount.Mount("{id or name}")=
+
+*** Sounds great, can I use it?
+
+You
++ have =python3= and =bash=/=zsh=?
++ use ssh keys and ssh-agent (or similar)?
++ have =rsync=, =python3 setuptools= installed?
++ are willing to put a =meta= dir in the directories you want to find?
+Then, yes!
+
+*** How does it work?
+
+You put a directory called =meta= inside the dir you care about (=smurf init=).
+This =meta= dir contains meta data including a =name.txt= file and a unique id (=meta/uuid/{the uuid}=).
+Then standard unix tools and caching are used to find and store the location of the dir you care about (you only need to use =smurf search ...=).
+
+*** How to install?
+
+Clone this repo, navigate to it and run =./scripts/deploy.sh=
+
+*** I want to add an existing simulation directory...
+
+Follow these steps:
++ =smurf init= create the =meta= dir and the id. The name will be set to the directories name.
++ =smurf cache --notify= tells smurf about the simulations
+
+*** How about adding many simulations?
+
++ =smurf init= all simulation directories.
++ add the root directory containing all the simulations with =smurf config add rootdir /path/to/simulations=
++ search through the rootdir and generate a cache with =smurf cache -g=
+
+*** I moved many folders and my cache is not accurate anymore. What to do?
+
++ check the entries in the cache and scrub it with =smurf cache -s=
++ maybe regenerate the cache with =smurf cache -g=
+
+*** I want to add a remote host to my smurf network...
+
++ install smurf onto the remote host by running =./scripts/deploy.sh remotehost= inside the repo dir.
++ ssh to remote host
++ configure smurf on the remote host just as on your local machine
+
+
+** Description
+
+Smurf uses =ssh= to automatically connect to your remote hosts and saves you to manually search for simulations on them and navigate to them.
+It also uses =sshfs= to mount data automatically.
+
+To do its job, smurf assumes that you login to remote hosts using ssh keys and that you set up a ssh-agent, such that you don't need to type your password every time you connect to a remote host.
+If you are unsure, try =ssh remotehost= and see if its works (you can configure your remote hosts in =~/.ssh.config=).
+If it fails, search online on how to set up ssh keys and a ssh-agent.
+
+Smurf provides a =python3= API and a command line interface.
+There is a =bash= and =zsh= plugin which features tab completion and the =scd= (get a shell at any simulation directory on any host) command.
+
+** Config
+
+Run
+
+#+begin_src sh
+smurf config
+#+end_src
+
+to show the current config values.
+
+*** Rootdirs
+
+Smurf allows you to specify root directories in which you can place the directories you want to track.
+The whole directory tree under each root dir is searched when generating the cache.
+
+To add/remove the rootdir =/scratch/simulations= run
+
+#+begin_src sh
+smurf config {add,remove} rootdir /scratch/simulations
+#+end_src
+
+*** Remote hosts
+
+To add/remove a remote host on which to search on, run
+
+#+begin_src sh
+smurf config {add,remove} host {remotehost}
+#+end_src
+
+Smurf uses =ssh= in the background, so you can use any address (=user@host= or just =host=) which you can use with =ssh {remotehost}=.
+Please make sure that you have set up a key agent (e.g. =ssh-agent=) so that you can login automatically.
+Otherwise you have to type your password  times.
+
 
 ** Setup
 
 To install =smurf= on your computer or server, follow these steps:
+
 1. Make sure you have installed all the requirements listed below.
 2. Clone this repository.
 3. Navigate to the repository in your terminal and run
 #+begin_src sh
-python3 setup.py install --user
+./scripts/deploy.sh
 #+end_src
 
-This installs the python packages and creates a wrapper to call it from the command line. Try it by running the command
+This installs the python packages (using =python3 setup.py install --user=) and creates a wrapper to call it from the command line. Try it by running the command
 #+begin_src sh
 smurf
 #+end_src
@@ -29,10 +130,20 @@ smurf enable_shell_plugin
 #+end_src
 and follow the instructions to activate it and add it to your =.bashrc/.zshrc= file.
 
+*** Install on remote host
+
+If you have =rsync= installed on your machine, you can install smurf on a remote host to which you can ssh with =ssh {remotehost}= via
+#+begin_src sh
+./scripts/deploy.sh {remotehost}
+#+end_src
+
+This saves you from cloning the repository on all your hosts and makes it easy to setup a whole smurf network.
+
 *** Requirements
 
 + =python3=
 + python3's =setuptools= package
+
 
 ** Basic idea and requirements
 
@@ -50,14 +161,11 @@ Additionally to the concept of simulation directories, I use the concept of proj
 These are indicated by a *.project* file which contains the name of the project.
 This file also serves for a way to find the project root directory walking up the directory tree until this file is found. (*smurf project root*).
 
-
 ** ideas for improvements
 
-+ Somehow store and keep up to date a database (e.g. mysql) of simulations using uuid identifiers.
-+ Update state of simulations regularly, e.g. by using cron jobs on each compute server/cluster and react on filesystem changes or update regularly.
-+ Have a tool to list and search simulation parameters.
++ store items in a database (e.g. mysql) instead of json file
 
-*** TODO define meta information version
+***  define meta information version
 
 Define a structure for the meta information and add an identifier to the meta dir to make it detectable.
 Define which information is where and add versioning.
@@ -65,5 +173,3 @@ Define which information is where and add versioning.
 *** Misc improvement ideas
 + smurf info add set/add command for fields
 + create .local/bin if not present and make sure its in PATH
-+ smurf info list index out of range for empty meta or uuid dir
-+ smurf info rename 'what' to 'choise'
