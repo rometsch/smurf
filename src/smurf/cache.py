@@ -82,7 +82,8 @@ def parse_command_line_args():
                         default=False,
                         action="store_true",
                         help="Notify the cache about a simulation.")
-    parser.add_argument("--list",
+    parser.add_argument("-l",
+                        "--list",
                         default=False,
                         action="store_true",
                         help="List all cached items.")
