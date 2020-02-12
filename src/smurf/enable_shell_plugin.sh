@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-SCRIPT_DIR="$(dirname $(realpath $0))"
+SCRIPT_DIR=$(python3 -c "import os; print(os.path.dirname(os.path.realpath('$0')))")
 HOME_DIR="$HOME/.smurf"
 mkdir -p "$HOME_DIR"
 cp $SCRIPT_DIR/shell_plugin "$HOME_DIR"
