@@ -8,14 +8,18 @@ else
 	exit 1
 fi
 
+# get the scripts location and cd to it
+SCRIPT_DIR=$(python3 -c "import os; print(os.path.dirname(os.path.realpath('$0')))")
+cd $SCRIPT_DIR
+cd ..
+
 if [[ ! -e "src" || ! -e "setup.py" ]]; then
 	echo "Could not find src dir or setup.py. Make sure they exist!"
 	exit 1
-else
-	CODENAME="$(basename $(realpath .))"
 fi
+CODENAME=$(python3 -c "import os; print(os.path.basename(os.path.realpath('.')))")
 
-UUID="$(uuidgen)"
+UUID=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 # handle platforms without /tmp but TMPDIR set
 if [[ "$HOST" != "localhost" ]]; then
