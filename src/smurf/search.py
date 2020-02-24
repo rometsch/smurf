@@ -147,27 +147,25 @@ def search(patterns,
                             fields=cache.sim_attributes,
                             unique=False,
                             exclusive=exclusive)
-    try:
-        c = cache.RemoteSimCache()
-        if (len(rv) == 0) and remote and (not force_global):
-            rv = search_remote_cache(patterns,
-                                     fields=cache.sim_attributes,
-                                     unique=False,
-                                     exclusive=exclusive)
-            if ensure_exist:
-                to_del = []
-                for n, s in enumerate(rv):
-                    if not exists_remote(sim):
-                        to_del.append(n)
-                for k, n in enumerate(to_del):
-                    del rv[n - k]
-        if (len(rv) == 0 and remote) or force_global:
+    rv += search_remote_cache(patterns,
+                              fields=cache.sim_attributes,
+                              unique=False,
+                              exclusive=exclusive)
+    if ensure_exist:
+        to_del = []
+        for n, s in enumerate(rv):
+            if not exists_remote(sim):
+                to_del.append(n)
+            for k, n in enumerate(to_del):
+                del rv[n - k]
+    if (len(rv) == 0 and remote) or force_global:
+        try:
             rv = search_global(patterns,
                                verbose=verbose,
                                exclusive=exclusive,
                                remote_cache=c)
-    except KeyError:
-        pass
+        except KeyError:
+            pass
     if len(rv) > 1 and unique:
         from smurf.cache import ResultNotUniqueError
         raise ResultNotUniqueError(
