@@ -235,7 +235,7 @@ class SimCache(JsonCache):
     def search(self,
                patterns,
                fields=sim_attributes,
-               unique=True,
+               unique=False,
                exclusive=False):
         """ Search through all information (key and all values) in the cache. """
         # make sure patterns is an iterable
