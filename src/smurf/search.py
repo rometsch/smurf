@@ -162,8 +162,7 @@ def search(patterns,
         try:
             rv = search_global(patterns,
                                verbose=verbose,
-                               exclusive=exclusive,
-                               remote_cache=c)
+                               exclusive=exclusive)
         except KeyError:
             pass
     if len(rv) > 1 and unique:
