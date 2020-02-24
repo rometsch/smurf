@@ -45,7 +45,8 @@ def main():
         c.rebuild()
 
     if args.list:
-        data = [x for x in c.data.values()]
+        crem = RemoteSimCache()
+        data = [x for x in c.data.values()] + [x for x in crem.data.values()]
         if args.json:
             print(json.dumps(data, indent=4))
         else:
