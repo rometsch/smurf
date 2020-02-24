@@ -116,10 +116,11 @@ def unmount_sshfs(local):
 
 
 @detachify
-def unmount_delayed(mount, remove=False):
+def unmount_delayed(mount, remove=False, waiting_time=None):
     """ unmount after some time if not still in use """
     time.sleep(1)
-    waiting_time = 120
+    if waiting_time is None:
+        waiting_time = 120
     # check whether path is still mounted
     for n in range(1000):
         if not mount.in_use() and mount.time_since_finished() > waiting_time:
