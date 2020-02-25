@@ -11,10 +11,15 @@ from uuid import uuid4
 
 class Mount:
     def __init__(self, remote, cache_timeout=None):
-        self.remote = remote
-        self.cache_timeout = cache_timeout
-        self.mount_uuid = str(uuid4())
-        self.mount()
+        if os.path.exists(remote):
+            self._is_local = True
+            self._path = remote
+        else:
+            self._is_local = False
+            self.remote = remote
+            self.cache_timeout = cache_timeout
+            self.mount_uuid = str(uuid4())
+            self.mount()
 
     def mount(self):
         existing = find_existing_mount(self.remote)
@@ -74,7 +79,10 @@ class Mount:
 
     def get_path(self):
         """ Return the path of the mount point """
-        return os.path.join(self.tempdir, "mnt")
+        if self._is_local:
+            return self._path
+        else:
+            return os.path.join(self.tempdir, "mnt")
 
     def unmount(self):
         """ Unmount and remove temporary directories """
