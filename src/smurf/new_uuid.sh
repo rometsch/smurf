@@ -2,7 +2,7 @@
 # Give the simulation a new uuid
 # This is stored as a file with the uuid as filename in meta/uuid/{uuid}
 [[ "$#" -eq 1 ]] && BASEDIR="$(realpath $1)" || BASEDIR="$PWD"
-UUID="$(uuidgen)"
+UUID=$(python3 -c "import uuid; print(uuid.uuid4())")
 if [[ -e "$BASEDIR/job" ]];then
         METADIR="$BASEDIR/job"
 elif [[ -e "$BASEDIR/meta" ]]; then
