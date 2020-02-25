@@ -1,4 +1,4 @@
-# Config structure for smurf.
+""" Config structure for smurf. """
 import os
 import sys
 import json
@@ -62,7 +62,7 @@ def expand_path(path):
 
 def check_information_type(info_type):
     if not any((info_type == t for t in information_types)):
-        raise AttributeError("Information type {} not supported".format(what))
+        raise AttributeError("Information type {} not supported".format(info_type))
 
 
 class Config:
