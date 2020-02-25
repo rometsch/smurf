@@ -22,7 +22,8 @@ def main():
 
 
 def parse_command_line_args():
-    import argparse, argcomplete
+    import argparse
+    import argcomplete
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "choice",
