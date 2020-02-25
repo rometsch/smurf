@@ -58,7 +58,8 @@ sim_attributes = ["uuid", "name", "tags", "simcode", "path", "host"]
 
 
 def parse_command_line_args():
-    import argparse, argcomplete
+    import argparse
+    import argcomplete
     parser = argparse.ArgumentParser()
     parser.add_argument("patterns",
                         default=[os.getcwd()],
@@ -109,6 +110,7 @@ class CacheMiss(Exception):
 
 class Cache:
     """ Implementation of a simple cache. """
+
     def __init__(self):
         self.data = {}
 
@@ -146,6 +148,7 @@ class Cache:
 
 class DoubleUuidCache(Cache):
     """ Extension of Cache which uses two sets of keys, uuids and the first part of uuids. """
+
     def __init__(self):
         self.key_map = {}
 
@@ -198,6 +201,7 @@ class DoubleUuidCache(Cache):
 
 class JsonCache(DoubleUuidCache):
     """ Implementation of a simple cache with the ability to store data in a json file """
+
     def __init__(self, cache_file):
         super().__init__()
         self.cache_file = cache_file
@@ -230,6 +234,7 @@ class JsonCache(DoubleUuidCache):
 
 class SimCache(JsonCache):
     """ A cache for simulations """
+
     def __init__(self, cache_file):
         super().__init__(cache_file)
 
@@ -264,6 +269,7 @@ class SimCache(JsonCache):
 
 class LocalSimCache(SimCache):
     """ A cache for simulations on the local host. """
+
     def __init__(self):
         self.conf = smurf.Config()
         cache_file = os.path.join(self.conf["home_path"],
@@ -307,6 +313,7 @@ class LocalSimCache(SimCache):
 
 class RemoteSimCache(SimCache):
     """ A cache for simulations on remote hosts. """
+
     def __init__(self):
         self.conf = smurf.Config()
         cache_file = os.path.join(self.conf["home_path"],
