@@ -185,7 +185,7 @@ class DoubleUuidCache(Cache):
     def is_uuid(self, key):
         """ Check whether a key is a valid uuid. """
         try:
-            uuid_obj = uuid.UUID(key)
+            uuid.UUID(key)
         except ValueError:
             return False
         return True
@@ -242,7 +242,7 @@ class SimCache(JsonCache):
         # make sure patterns is an iterable
         patterns = ensure_is_list(patterns)
         matches = []
-        for key, sim in self.data.items():
+        for sim in self.data.values():
             for field in fields:
                 res = [re.search(p, sim[field]) is not None for p in patterns]
                 success = all(res) if exclusive else any(res)
@@ -288,7 +288,7 @@ class LocalSimCache(SimCache):
         else:
             bases = self.rootdir_list
         for base in bases:
-            for root, dirs, files in os.walk(base):
+            for root, _, _ in os.walk(base):
                 if siminfo.is_simdir(root):
                     self.add_sim_to_cache(root)
 
