@@ -80,7 +80,8 @@ def print_table(info_list):
         List containing info dicts.
     """
     fields = [("uuid", 8), ("host", 15), ("name", 40)]
-    for info in info_list:
+    sorted_list = sorted(info_list, key=lambda info: info["host"])
+    for info in sorted_list:
         s = ""
         for f, l in fields:
             s += ("{:" + str(l) + "s}\t").format(info[f][:l])
