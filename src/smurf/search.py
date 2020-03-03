@@ -148,10 +148,11 @@ def search(patterns,
                             fields=cache.sim_attributes,
                             unique=False,
                             exclusive=exclusive)
-    rv += search_remote_cache(patterns,
-                              fields=cache.sim_attributes,
-                              unique=False,
-                              exclusive=exclusive)
+    if remote:
+        rv += search_remote_cache(patterns,
+                                  fields=cache.sim_attributes,
+                                  unique=False,
+                                  exclusive=exclusive)
     if ensure_exist:
         to_del = []
         for n, s in enumerate(rv):
@@ -161,9 +162,7 @@ def search(patterns,
                 del rv[n - k]
     if (len(rv) == 0 and remote) or force_global:
         try:
-            rv = search_global(patterns,
-                               verbose=verbose,
-                               exclusive=exclusive)
+            rv = search_global(patterns, verbose=verbose, exclusive=exclusive)
         except KeyError:
             pass
     if len(rv) > 1 and unique:
