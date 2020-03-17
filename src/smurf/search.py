@@ -17,7 +17,6 @@ def main():
                 force_global=args.g)
 
     if args.json:
-        import json
         print(json.dumps(rv, indent=4))
     elif args.print:
         for sim in rv:
@@ -107,7 +106,7 @@ def ensure_list(x):
 
 def exists_remote(sim):
     """ Verify that the simulation exists on the remote host. """
-    res = run([
+    res = subprocess.run([
         "ssh", sim["host"], "'[[ -e \"{}\" ]] && exit 0 || exit 1'".format(
             sim["path"])
     ],
@@ -156,10 +155,10 @@ def search(patterns,
     if ensure_exist:
         to_del = []
         for n, s in enumerate(rv):
-            if not exists_remote(sim):
+            if not exists_remote(s):
                 to_del.append(n)
-            for k, n in enumerate(to_del):
-                del rv[n - k]
+            for k, m in enumerate(to_del):
+                del rv[m - k]
     if (len(rv) == 0 and remote) or force_global:
         try:
             rv = search_global(patterns, verbose=verbose, exclusive=exclusive)
@@ -212,7 +211,7 @@ def search_remote(args):
         stdout = res.stdout.decode("utf-8")
         if verbose:
             print("Response from '{}' for search patter '{}':\n{}".format(
-                host, pattern, stdout))
+                host, patterns, stdout))
         simulations = json.loads(stdout)
         for sim in simulations:
             sim["host"] = host
@@ -221,6 +220,9 @@ def search_remote(args):
         if verbose:
             print("Exception occured during search on '{}': {}".format(
                 host, e))
+        return []
+    except subprocess.TimeoutExpired:
+        print("Host {} did not reply after {} sec. Ignoring it.".format(host, search_timeout))
         return []
 
 
