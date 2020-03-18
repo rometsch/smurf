@@ -1,7 +1,9 @@
-import smurf.cache as cache
-import smurf
-import subprocess
 import json
+import subprocess
+
+import smurf
+import smurf.cache as cache
+import smurf.remote as remote
 
 # timeout after which to cancel search if host does not respond
 search_timeout = 10
@@ -29,7 +31,8 @@ def main():
 
 
 def parse_command_line_args():
-    import argparse, argcomplete
+    import argparse
+    import argcomplete
     parser = argparse.ArgumentParser()
     parser.add_argument("patterns", nargs="+", help="What to search for.")
     parser.add_argument("-v", "--verbose", default=False, action="store_true")
@@ -110,8 +113,8 @@ def exists_remote(sim):
         "ssh", sim["host"], "'[[ -e \"{}\" ]] && exit 0 || exit 1'".format(
             sim["path"])
     ],
-              stdout=subprocess.PIPE,
-              stderr=subprocess.PIPE)
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
     return res.returncode == 0
 
 
@@ -198,16 +201,16 @@ def search_remote(args):
     exclusive = args[3]
     try:
         command = [
-            "ssh", host, "$HOME/.local/bin/smurf", "search", "--local",
+            "$HOME/.local/bin/smurf", "search", "--local",
             "--json"
         ] + patterns
         if exclusive:
             command += ["-e"]
-        res = subprocess.run(command,
-                             check=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             timeout=search_timeout)
+        res = remote.multiplexed_ssh(host, command,
+                                     check=True,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     timeout=search_timeout)
         stdout = res.stdout.decode("utf-8")
         if verbose:
             print("Response from '{}' for search patter '{}':\n{}".format(
@@ -222,7 +225,8 @@ def search_remote(args):
                 host, e))
         return []
     except subprocess.TimeoutExpired:
-        print("Host {} did not reply after {} sec. Ignoring it.".format(host, search_timeout))
+        print("Host {} did not reply after {} sec. Ignoring it.".format(
+            host, search_timeout))
         return []
 
 

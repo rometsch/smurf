@@ -1,5 +1,7 @@
 # Caller for scripts in the smurf package
-import os, sys
+import argparse
+import os
+import sys
 from subprocess import run
 
 this_files_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,20 +13,42 @@ def main():
     if script_file_name(name)[-3:] == ".py":
         import importlib
         script_module = importlib.import_module("." + name, package="smurf")
-        sys.argv = [os.path.join(this_files_dir, name + ".py")] + sys.argv[2:]
+        sys.argv = [os.path.join(this_files_dir, name + ".py")] + args.args
         script_module.main()
     else:
         run([script_path(name)] + args.args)
 
 
+def get_ssh_original_command_args():
+    try:
+        if sys.argv[1] == "--use-ssh-original-command":
+            argv = os.environ["SSH_ORIGINAL_COMMAND"].strip().split()
+            if "smurf" in argv[0]:
+                argv = argv[1:]
+            else:
+                print("Use of restricted smurf ssh key invalid command!",
+                      file=sys.stderr)
+                exit(1)
+        else:
+            argv = sys.argv[1:]
+    except (IndexError, KeyError):
+        argv = sys.argv[1:]
+    return argv
+
+
 def parse_command_line_args():
-    import argparse
+    ssh_argv = get_ssh_original_command_args()
+    if len(ssh_argv) > 0:
+        argv = ssh_argv
+    else:
+        argv = sys.argv[1:]
+
     parser = argparse.ArgumentParser()
     parser.add_argument("script",
                         choices=available_scripts(),
                         help="name of the script to run")
     parser.add_argument("args", nargs=argparse.REMAINDER)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     return args
 
 
