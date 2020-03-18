@@ -62,7 +62,8 @@ def expand_path(path):
 
 def check_information_type(info_type):
     if not any((info_type == t for t in information_types)):
-        raise AttributeError("Information type {} not supported".format(info_type))
+        raise AttributeError(
+            "Information type {} not supported".format(info_type))
 
 
 class Config:

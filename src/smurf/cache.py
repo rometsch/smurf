@@ -98,6 +98,18 @@ def parse_command_line_args():
 
 
 def expand_path(path):
+    """ Support paths including ~ for home.
+    
+    Parameters
+    ----------
+    path: str
+        Input path.
+
+    Returns
+    -------
+    str
+        Path with ~ replace by user's home.
+     """
     abspath = os.path.abspath(os.path.expanduser(path))
     if not os.path.exists(abspath):
         raise FileNotFoundError("No such directory: {}".format(path))
@@ -325,6 +337,17 @@ class RemoteSimCache(SimCache):
 
 
 def ensure_is_list(x):
+    """ Ensure that the argument is an iterable item with a length. 
+
+    Parameters
+    ----------
+    x
+        Any iterable or object.
+
+    Returns
+    -------
+        x if x is an iterable, otherwise [x]
+    """
     try:
         len(x)
         if isinstance(x, str):

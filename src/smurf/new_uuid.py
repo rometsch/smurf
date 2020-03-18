@@ -14,9 +14,8 @@ def main():
 def new_uuid(path):
     if not is_simdir(path):
         sys.tracebacklimit = 0
-        raise ValueError(
-            "The directory is not a simdir! '{}'".format(path)
-            + "\nMaybe you want to use 'smurf init' instead?")
+        raise ValueError("The directory is not a simdir! '{}'".format(path) +
+                         "\nMaybe you want to use 'smurf init' instead?")
 
     info = Info(path=path, create=False)
     info.generate_uuid()
@@ -31,8 +30,7 @@ def parse_command_line_args():
         "directory",
         nargs="?",
         default=os.getcwd(),
-        help="Directory to give a new uuid to. [default: current directory]."
-    )
+        help="Directory to give a new uuid to. [default: current directory].")
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     return args
