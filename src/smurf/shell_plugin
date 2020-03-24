@@ -20,19 +20,23 @@ function rcd () {
 		return
 	fi
 	# split destination string
-	FIRST="$(echo $1 | awk '{split($0,a,":"); print a[1]}')"
-	SECOND="$(echo $1 | awk '{split($0,a,":"); print a[2]}')"
+	local FIRST="$(echo $1 | awk '{split($0,a,":"); print a[1]}')"
+	local SECOND="$(echo $1 | awk '{split($0,a,":"); print a[2]}')"
 	if [[ -n "$FIRST" && -z "$SECOND" ]]; then
 		if [ -d "$FIRST" ]; then
 			cd "$FIRST"
 		fi
 	elif [[ -n "$FIRST" && -n "$SECOND" ]]; then
-		HOST="$FIRST"
-		DIR="$SECOND"
-		ssh -t $HOST "cd $DIR ; \$SHELL -l"
+		local REMOTE_HOST="$FIRST"
+		local REMOTE_DIR="$SECOND"
+		ssh -t $REMOTE_HOST "cd $REMOTE_DIR ; \$SHELL -l"
 	else
 		>&2 echo "Invalid syntax!"
 	fi
+	unset REMOTE_DIR
+	unset REMOTE_HOST
+	unset FIRST
+	unset SECOND
 }
 
 alias scd='smurfcd'
