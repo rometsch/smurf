@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 
 import smurf
 import smurf.cache as cache
@@ -165,7 +166,7 @@ def search(patterns,
     if (len(rv) == 0 and remote) or force_global:
         try:
             rv = search_global(patterns, verbose=verbose, exclusive=exclusive)
-        except KeyError:
+        except KeyError as e:
             pass
     if len(rv) > 1 and unique:
         from smurf.cache import ResultNotUniqueError
@@ -226,7 +227,7 @@ def search_remote(args):
         return []
     except subprocess.TimeoutExpired:
         print("Host {} did not reply after {} sec. Ignoring it.".format(
-            host, search_timeout))
+            host, search_timeout), file=sys.stderr)
         return []
 
 
