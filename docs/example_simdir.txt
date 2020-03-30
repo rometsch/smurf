@@ -1,0 +1,13 @@
+fancy_sim
+├── code
+│   └── simulations.sh
+├── meta
+│   ├── name.txt
+│   ├── note.txt
+│   ├── simcode.txt
+│   ├── tags.txt
+│   └── uuid
+│       └── 2fd27392-cf49-4df5-a92c-ea7f8076c9b2
+└── output
+    └── important.data
+
