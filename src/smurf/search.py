@@ -78,14 +78,30 @@ def print_table(info_list):
     info_list : list
         List containing info dicts.
     """
-    fields = [("uuid", 8), ("host", 15), ("name", 40)]
+    fields = [("uuid", 8), ("host", 15), ("tags", 30), ("name", 60)]
     sorted_list = sorted(info_list, key=lambda info: info["host"])
+    all_lines = []
+    all_lengths = []
     for info in sorted_list:
-        s = ""
+        line = []
+        lengths = []
         for f, l in fields:
-            s += ("{:" + str(l) + "s}\t").format(info[f][:l])
-        print(s)
-
+            s = "{}".format(info[f])
+            if f == "tags":
+                s = s.replace(" ", "")
+            line.append(s)
+            lengths.append(len(s))
+        all_lines.append(line)
+        all_lengths.append(lengths)
+    if len(all_lines) == 0:
+        return
+    max_lengths = [ max([l[n] for l in all_lengths]) for n in range(len(fields)) ]
+    max_lengths[0] = 8
+    for strings in all_lines:
+        line = ""
+        for s, l in zip(strings, max_lengths):
+            line += ("{:" + str(l+3) + "s}").format(s[:l])
+        print(line)
 
 def remote_path(sim):
     if "host" in sim and sim["host"] != "localhost":
