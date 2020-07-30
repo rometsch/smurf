@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+import os
 
 import smurf
 import smurf.cache as cache
@@ -17,7 +18,8 @@ def main():
                 unique=args.unique,
                 exclusive=args.exclusive_search,
                 remote=not args.local,
-                force_global=args.g)
+                force_global=args.g,
+                ensure_exist=args.validate)
 
     if args.json:
         print(json.dumps(rv, indent=4))
@@ -69,6 +71,10 @@ def parse_command_line_args():
                         default=False,
                         action="store_true",
                         help="Output as json.")
+    parser.add_argument("--validate",
+                        default=False,
+                        action="store_true",
+                        help="Check that simulation exists on host and delete from cache if not.")
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     return args
@@ -82,7 +88,7 @@ def print_table(info_list):
     info_list : list
         List containing info dicts.
     """
-    fields = [("uuid", 8), ("host", 15), ("name", 40)]
+    fields = [("uuid", 8), ("host", 15), ("tags", 20), ("name", 60)]
     sorted_list = sorted(info_list, key=lambda info: info["host"])
     for info in sorted_list:
         s = ""
@@ -110,12 +116,15 @@ def ensure_list(x):
 
 def exists_remote(sim):
     """ Verify that the simulation exists on the remote host. """
-    res = subprocess.run([
-        "ssh", sim["host"], "'[[ -e \"{}\" ]] && exit 0 || exit 1'".format(
-            sim["path"])
-    ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+    if sim["host"] == "localhost":
+        return os.path.isdir(sim["path"])
+    res = remote.multiplexed_ssh(sim["host"],
+                                #  ["'[[ -e \"{}\" ]] && exit 0 || exit 1'".format(sim["path"])],
+                                 ['exit 0'],
+                                 check=True,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 timeout=search_timeout)
     return res.returncode == 0
 
 
