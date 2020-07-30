@@ -96,7 +96,7 @@ class Mount:
 def mount_sshfs(remote, local, remove=True, cache_timeout=None):
     # mount a remote location to a local directory using sshfs
     if cache_timeout is None:
-        cache_timeout = 120
+        cache_timeout = 900
     timeout = str(cache_timeout)
     run([
         "sshfs", "-o", "ro", "-o", "kernel_cache", "-o", "cache=yes", "-o",
