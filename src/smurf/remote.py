@@ -20,7 +20,7 @@ def get_ssh_socket_path():
     return socket_path
 
 
-def multiplexed_ssh(host, cmd, multiplex_timeout="24h", **kwargs):
+def multiplexed_ssh(host, cmd, multiplex_timeout="30d", **kwargs):
     """ Run command over a multiplexed ssh connection using smurf keys.
 
     If there is no key setup for the host, fall back to normal ssh.
