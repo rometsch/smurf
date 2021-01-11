@@ -321,6 +321,7 @@ class LocalSimCache(SimCache):
                 "tags": ", ".join(info.tags),
                 "simcode": info.simcode
             })
+        return info.uuid
 
 
 class RemoteSimCache(SimCache):
