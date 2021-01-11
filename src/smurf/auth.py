@@ -14,6 +14,18 @@ on the remote host.
 import os
 import subprocess
 
+from smurf import config
+
+def main():
+    c = config.Config()
+    for host in c["host_list"]:
+        priv_key_path, _ = get_key_paths(host)
+        if not os.path.exists(priv_key_path):
+            print(f"No smurf ssh key found for host '{host}' : setting up new key...")
+            setup_smurf_ssh_key(host)
+        else:
+            print(f"Smurf ssh key found for host '{host}' : '{priv_key_path}'")
+    
 
 def get_key_dir():
     """ Return the key directory and make sure it exists.
@@ -117,3 +129,7 @@ def setup_smurf_ssh_key(host):
     """
     generate_ssh_key(host)
     copy_ssh_key(host)
+
+
+if __name__ == "__main__":
+    main()
