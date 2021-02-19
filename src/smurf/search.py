@@ -119,13 +119,13 @@ def exists_remote(sim):
     if sim["host"] == "localhost":
         return os.path.isdir(sim["path"])
     res = remote.multiplexed_ssh(sim["host"],
-                                #  ["'[[ -e \"{}\" ]] && exit 0 || exit 1'".format(sim["path"])],
-                                 ['exit 0'],
+                                 [".local/bin/smurf", "search", "--local", "--json", sim["uuid"]],
                                  check=True,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  timeout=search_timeout)
-    return res.returncode == 0
+    ans = json.loads(res.stdout.decode("utf-8"))
+    return len(ans) > 0
 
 
 def search(patterns,
@@ -170,8 +170,10 @@ def search(patterns,
         for n, s in enumerate(rv):
             if not exists_remote(s):
                 to_del.append(n)
-            for k, m in enumerate(to_del):
-                del rv[m - k]
+        for k, m in enumerate(to_del):
+            simid = rv[m-k]["uuid"]
+            cache.RemoteSimCache().remove(simid)
+            del rv[m - k]
     if (len(rv) == 0 and remote) or force_global:
         try:
             rv = search_global(patterns, verbose=verbose, exclusive=exclusive)
