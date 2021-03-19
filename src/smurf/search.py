@@ -88,12 +88,16 @@ def print_table(info_list):
     info_list : list
         List containing info dicts.
     """
-    fields = [("uuid", 8), ("host", 15), ("tags", 20), ("name", 60)]
+    fields = ["uuid", "name", "host", "tags"]
+    maxlen = {"uuid" : 8}
+    for key in fields[1:]:
+        maxlen[key] = max([len(e[key]) for e in info_list]) 
+    
     sorted_list = sorted(info_list, key=lambda info: info["host"])
     for info in sorted_list:
         s = ""
-        for f, l in fields:
-            s += ("{:" + str(l) + "s}\t").format(info[f][:l])
+        for f in fields:
+            s += ("{:" + str(maxlen[f]) + "s}\t").format(info[f][:maxlen[f]])
         print(s)
 
 
