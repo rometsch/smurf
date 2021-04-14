@@ -88,6 +88,8 @@ def print_table(info_list):
     info_list : list
         List containing info dicts.
     """
+    if len(info_list) == 0:
+        return
     fields = ["uuid", "name", "host", "tags"]
     maxlen = {"uuid" : 8}
     for key in fields[1:]:
