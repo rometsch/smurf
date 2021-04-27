@@ -41,7 +41,6 @@ class Mount:
         os.mkdir(self.get_path())
         mount_sshfs(self.remote,
                     self.get_path(),
-                    remove=True,
                     cache_timeout=self.cache_timeout)
 
     def flag_active(self):
@@ -75,7 +74,7 @@ class Mount:
 
     def create_unmounter(self):
         """ Spawn a detached process to unmount the sshfs after a certain period. """
-        atexit.register(lambda: unmount_delayed(self, remove=True))
+        atexit.register(lambda: unmount_delayed(self))
 
     def get_path(self):
         """ Return the path of the mount point """
@@ -93,7 +92,7 @@ class Mount:
         os.rmdir(self.tempdir)
 
 
-def mount_sshfs(remote, local, remove=True, cache_timeout=None):
+def mount_sshfs(remote, local, cache_timeout=None):
     # mount a remote location to a local directory using sshfs
     if cache_timeout is None:
         cache_timeout = 900
@@ -124,7 +123,7 @@ def unmount_sshfs(local):
 
 
 @detachify
-def unmount_delayed(mount, remove=False, waiting_time=None):
+def unmount_delayed(mount, waiting_time=None):
     """ unmount after some time if not still in use """
     time.sleep(1)
     if waiting_time is None:
@@ -136,3 +135,48 @@ def unmount_delayed(mount, remove=False, waiting_time=None):
             return
         else:
             time.sleep(waiting_time)
+
+
+def sshfs_mounts():
+    res = run(["mount"], stdout=PIPE, encoding="utf-8").stdout.splitlines()
+    mounts = []
+    for line in res:
+        if all([s in line for s in ["smurf", "sshfs"]]):
+            mounts.append(line)
+    return mounts
+
+
+def remount(line):
+    remote = line.split()[0]
+    local = line.split()[2]
+    unmount_sshfs(local)
+    mount_sshfs(remote, local)
+
+
+def unmount(line):
+    local = line.split()[2]
+    unmount_sshfs(local)
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--remount", type=int,
+                        help="Remount sshfs mount. Specify the index of the mountpoint as given by smurf mount.")
+    parser.add_argument("-u", "--unmount", type=int,
+                        help="Remount sshfs mount. Specify the index of the mountpoint as given by smurf mount.")
+    args = parser.parse_args()
+
+    mounts = sshfs_mounts()
+
+    if args.remount is not None:
+        remount(mounts[args.remount])
+    elif args.unmount is not None:
+        unmount(mounts[args.unmount])
+    else:
+        for n, line in enumerate(mounts):
+            print(f"{n} : {line}")
+
+
+if __name__ == "__main__":
+    main()
