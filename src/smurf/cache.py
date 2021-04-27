@@ -236,7 +236,7 @@ class JsonCache(DoubleUuidCache):
             self.data = {}
         except json.decoder.JSONDecodeError:
             if self.recursion_depth < 4:
-                self.recursion_depth -= 1
+                self.recursion_depth += 1
                 time.sleep(0.1)
                 self.load()
 
