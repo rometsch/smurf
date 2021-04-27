@@ -22,9 +22,14 @@ def main():
 
     c = LocalSimCache()
 
-    if args.notify:
-        for p in args.patterns:
-            c.add_sim_to_cache(expand_path(p))
+    if args.notify is not None:
+        if len(args.notify) == 0:
+            args.notify.append(os.getcwd())
+        for d in args.notify:
+            try:
+                c.add_sim_to_cache(expand_path(d))
+            except FileNotFoundError as e:
+                print(e)
         sys.exit(0)
 
     if args.scrub:
@@ -62,10 +67,6 @@ def parse_command_line_args():
     import argparse
     import argcomplete
     parser = argparse.ArgumentParser()
-    parser.add_argument("patterns",
-                        default=[os.getcwd()],
-                        nargs="*",
-                        help="What to search for.")
     parser.add_argument("--json",
                         default=False,
                         action="store_true",
@@ -82,8 +83,7 @@ def parse_command_line_args():
                         help="Remove non existing simulations from the cache.")
     parser.add_argument("-n",
                         "--notify",
-                        default=False,
-                        action="store_true",
+                        nargs="*",
                         help="Notify the cache about a simulation.")
     parser.add_argument("-l",
                         "--list",
