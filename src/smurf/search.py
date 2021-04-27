@@ -1,7 +1,11 @@
-import smurf.cache as cache
-import smurf
-import subprocess
 import json
+import subprocess
+import sys
+import os
+
+import smurf
+import smurf.cache as cache
+import smurf.remote as remote
 
 # timeout after which to cancel search if host does not respond
 search_timeout = 10
@@ -14,7 +18,8 @@ def main():
                 unique=args.unique,
                 exclusive=args.exclusive_search,
                 remote=not args.local,
-                force_global=args.g)
+                force_global=args.g,
+                ensure_exist=args.validate)
 
     if args.json:
         print(json.dumps(rv, indent=4))
@@ -29,7 +34,8 @@ def main():
 
 
 def parse_command_line_args():
-    import argparse, argcomplete
+    import argparse
+    import argcomplete
     parser = argparse.ArgumentParser()
     parser.add_argument("patterns", nargs="+", help="What to search for.")
     parser.add_argument("-v", "--verbose", default=False, action="store_true")
@@ -65,6 +71,10 @@ def parse_command_line_args():
                         default=False,
                         action="store_true",
                         help="Output as json.")
+    parser.add_argument("--validate",
+                        default=False,
+                        action="store_true",
+                        help="Check that simulation exists on host and delete from cache if not.")
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     return args
@@ -78,12 +88,18 @@ def print_table(info_list):
     info_list : list
         List containing info dicts.
     """
-    fields = [("uuid", 8), ("host", 15), ("name", 40)]
+    if len(info_list) == 0:
+        return
+    fields = ["uuid", "name", "host", "tags"]
+    maxlen = {"uuid" : 8}
+    for key in fields[1:]:
+        maxlen[key] = max([len(e[key]) for e in info_list]) 
+    
     sorted_list = sorted(info_list, key=lambda info: info["host"])
     for info in sorted_list:
         s = ""
-        for f, l in fields:
-            s += ("{:" + str(l) + "s}\t").format(info[f][:l])
+        for f in fields:
+            s += ("{:" + str(maxlen[f]) + "s}\t").format(info[f][:maxlen[f]])
         print(s)
 
 
@@ -106,13 +122,16 @@ def ensure_list(x):
 
 def exists_remote(sim):
     """ Verify that the simulation exists on the remote host. """
-    res = subprocess.run([
-        "ssh", sim["host"], "'[[ -e \"{}\" ]] && exit 0 || exit 1'".format(
-            sim["path"])
-    ],
-              stdout=subprocess.PIPE,
-              stderr=subprocess.PIPE)
-    return res.returncode == 0
+    if sim["host"] == "localhost":
+        return os.path.isdir(sim["path"])
+    res = remote.multiplexed_ssh(sim["host"],
+                                 [".local/bin/smurf", "search", "--local", "--json", sim["uuid"]],
+                                 check=True,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 timeout=search_timeout)
+    ans = json.loads(res.stdout.decode("utf-8"))
+    return len(ans) > 0
 
 
 def search(patterns,
@@ -157,12 +176,14 @@ def search(patterns,
         for n, s in enumerate(rv):
             if not exists_remote(s):
                 to_del.append(n)
-            for k, m in enumerate(to_del):
-                del rv[m - k]
+        for k, m in enumerate(to_del):
+            simid = rv[m-k]["uuid"]
+            cache.RemoteSimCache().remove(simid)
+            del rv[m - k]
     if (len(rv) == 0 and remote) or force_global:
         try:
             rv = search_global(patterns, verbose=verbose, exclusive=exclusive)
-        except KeyError:
+        except KeyError as e:
             pass
     if len(rv) > 1 and unique:
         from smurf.cache import ResultNotUniqueError
@@ -198,16 +219,16 @@ def search_remote(args):
     exclusive = args[3]
     try:
         command = [
-            "ssh", host, "$HOME/.local/bin/smurf", "search", "--local",
+            "$HOME/.local/bin/smurf", "search", "--local",
             "--json"
         ] + patterns
         if exclusive:
             command += ["-e"]
-        res = subprocess.run(command,
-                             check=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             timeout=search_timeout)
+        res = remote.multiplexed_ssh(host, command,
+                                     check=True,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     timeout=search_timeout)
         stdout = res.stdout.decode("utf-8")
         if verbose:
             print("Response from '{}' for search patter '{}':\n{}".format(
@@ -222,7 +243,8 @@ def search_remote(args):
                 host, e))
         return []
     except subprocess.TimeoutExpired:
-        print("Host {} did not reply after {} sec. Ignoring it.".format(host, search_timeout))
+        print("Host {} did not reply after {} sec. Ignoring it.".format(
+            host, search_timeout), file=sys.stderr)
         return []
 
 

@@ -6,6 +6,7 @@ import re
 import smurf
 import smurf.info as siminfo
 import uuid
+import time
 
 
 class NoSimulationFoundError(Exception):
@@ -227,11 +228,17 @@ class JsonCache(DoubleUuidCache):
 
     def load(self):
         """ Load the cache from file or create an empty one. """
+        self.recursion_depth = 0
         try:
             with open(self.cache_file, "r") as infile:
                 self.data = json.load(infile)
         except FileNotFoundError:
             self.data = {}
+        except json.decoder.JSONDecodeError:
+            if self.recursion_depth < 4:
+                self.recursion_depth -= 1
+                time.sleep(0.1)
+                self.load()
 
     def insert(self, key, value):
         """ Insert an element and save the cache to file. """
@@ -321,6 +328,7 @@ class LocalSimCache(SimCache):
                 "tags": ", ".join(info.tags),
                 "simcode": info.simcode
             })
+        return info.uuid
 
 
 class RemoteSimCache(SimCache):

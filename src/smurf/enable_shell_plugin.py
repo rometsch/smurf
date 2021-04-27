@@ -13,6 +13,8 @@ def main():
     dot_dir = os.path.expanduser("~/." + package_name)
 
     # write a file for the shell completion to hint at the package dir
+    if not os.path.exists(dot_dir):
+        os.makedirs(dot_dir)
     with open(os.path.join(dot_dir, "script_dir.txt"), "w") as of:
         of.write(package_dir)
 
