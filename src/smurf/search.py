@@ -93,7 +93,7 @@ def print_table(info_list):
     fields = ["uuid", "name", "host", "tags"]
     maxlen = {"uuid" : 8}
     for key in fields[1:]:
-        maxlen[key] = max([len(e[key]) for e in info_list]) 
+        maxlen[key] = max([len(e[key]) for e in info_list] + [1]) 
     
     sorted_list = sorted(info_list, key=lambda info: info["host"])
     for info in sorted_list:
