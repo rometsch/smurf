@@ -110,7 +110,7 @@ def mount_sshfs(remote, local, cache_timeout=None):
 def find_existing_mount(path):
     res = run(["mount"], stdout=PIPE, encoding="utf-8").stdout.splitlines()
     for line in res:
-        if path in line:
+        if path in line and line.split()[2][:4] == "/tmp":
             return Path(line.split()[2])
 
 
