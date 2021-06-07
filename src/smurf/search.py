@@ -25,7 +25,7 @@ def main():
         print(json.dumps(rv, indent=4))
     elif args.print:
         for sim in rv:
-            if args.print == "path":
+            if args.print == "location":
                 print(remote_path(sim))
             else:
                 print(sim[args.print])
