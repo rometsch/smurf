@@ -1,6 +1,6 @@
 # change to the simdir
 function smurfcd () {
-		IFS="" DIRS="$(smurf search -p path $@)"
+		IFS="" DIRS="$(smurf search -p location $@)"
 		unset IFS
 		if [[ "$(echo $DIRS | wc -l | tr -d '[ ]')" == "1" ]]; then
 			rcd "$DIRS"

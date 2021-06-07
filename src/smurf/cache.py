@@ -60,7 +60,7 @@ def main():
             print_table(data)
 
 
-sim_attributes = ["uuid", "name", "tags", "simcode", "path", "host"]
+sim_attributes = ["uuid", "name", "tags", "simcode", "path", "host", "location"]
 
 
 def parse_command_line_args():
