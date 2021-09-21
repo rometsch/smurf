@@ -268,8 +268,11 @@ class SimCache(JsonCache):
         matches = []
         for sim in self.data.values():
             for field in fields:
-                res = [re.search(p, sim[field]) is not None for p in patterns]
-                success = all(res) if exclusive else any(res)
+                try:
+                    res = [re.search(p, sim[field]) is not None for p in patterns]
+                    success = all(res) if exclusive else any(res)
+                except KeyError:
+                    success = False
                 if success:
                     matches.append(sim)
                     break
