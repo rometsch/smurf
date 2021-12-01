@@ -134,6 +134,33 @@ def exists_remote(sim):
     return len(ans) > 0
 
 
+def search_net(patterns=None, relay="localhost"):
+    """ Search for a pattern using the simdata-net relay server.
+    
+    Paramters
+    ---------
+    patterns: list of str
+        Patterns to search.
+    relay: str
+        Relay server.
+
+    Returns
+    -------
+    dict
+        Search results.
+    """
+    from simdata_net.client import make_request
+    import urllib
+    query = dict(
+        pattern=patterns
+    )
+    query = {k:v for k,v in query.items() if v is not None}
+    uri = urllib.parse.urlencode(query, doseq=True)
+    url = f"smurf://{relay}/search?{uri}"
+    rv = make_request(url)
+    return rv
+
+
 def search(patterns,
            unique=False,
            exclusive=False,
@@ -162,6 +189,16 @@ def search(patterns,
         Simulations that match the search patterns.
     """
     patterns = ensure_list(patterns)
+
+    conf = smurf.Config()
+    if "relay-server" in conf.data:
+        rv = search_net(
+            patterns=patterns, 
+            relay=conf.data["relay-server"])
+        rv = json.loads(rv)
+        return rv
+
+
     rv = search_local_cache(patterns,
                             fields=cache.sim_attributes,
                             unique=False,
