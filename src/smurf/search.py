@@ -149,7 +149,7 @@ def search_net(patterns=None, relay="localhost"):
     dict
         Search results.
     """
-    from simdata_net.client import make_request
+    from smurfnet.client import make_request
     import urllib
     query = dict(
         pattern=patterns
