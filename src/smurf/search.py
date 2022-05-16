@@ -5,7 +5,6 @@ import os
 
 import smurf
 import smurf.cache as cache
-import smurf.remote as remote
 
 # timeout after which to cancel search if host does not respond
 search_timeout = 10
@@ -124,25 +123,21 @@ def exists_remote(sim):
     """ Verify that the simulation exists on the remote host. """
     if sim["host"] == "localhost":
         return os.path.isdir(sim["path"])
-    res = remote.multiplexed_ssh(sim["host"],
-                                 [".local/bin/smurf", "search", "--local", "--json", sim["uuid"]],
-                                 check=True,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 timeout=search_timeout)
-    ans = json.loads(res.stdout.decode("utf-8"))
+    ans = search_net(sim, action="verify", update=True)
     return len(ans) > 0
 
 
-def search_net(patterns=None, relay="localhost"):
-    """ Search for a pattern using the simdata-net relay server.
+def search_net(patterns=None, host="localhost", update=False, action="search"):
+    """ Search for a pattern using the smurfnet relay server.
     
     Paramters
     ---------
     patterns: list of str
         Patterns to search.
-    relay: str
+    host: str
         Relay server.
+    update: bool
+        Invalidate cache and force new search.
 
     Returns
     -------
@@ -156,7 +151,9 @@ def search_net(patterns=None, relay="localhost"):
     )
     query = {k:v for k,v in query.items() if v is not None}
     uri = urllib.parse.urlencode(query, doseq=True)
-    url = f"smurf://{relay}/search?{uri}"
+    url = f"smurf://{host}/{action}?{uri}"
+    if update:
+        url += "#update"
     rv = make_request(url)
     return rv
 
@@ -194,7 +191,7 @@ def search(patterns,
     if "relay-server" in conf.data:
         rv = search_net(
             patterns=patterns, 
-            relay=conf.data["relay-server"])
+            host=conf.data["relay-server"])
         rv = json.loads(rv)
         return rv
 
@@ -254,35 +251,11 @@ def search_remote(args):
     patterns = args[1]
     verbose = args[2]
     exclusive = args[3]
-    try:
-        command = [
-            "$HOME/.local/bin/smurf", "search", "--local",
-            "--json"
-        ] + patterns
-        if exclusive:
-            command += ["-e"]
-        res = remote.multiplexed_ssh(host, command,
-                                     check=True,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     timeout=search_timeout)
-        stdout = res.stdout.decode("utf-8")
-        if verbose:
-            print("Response from '{}' for search patter '{}':\n{}".format(
-                host, patterns, stdout))
-        simulations = json.loads(stdout)
-        for sim in simulations:
-            sim["host"] = host
-        return simulations
-    except subprocess.CalledProcessError as e:
-        if verbose:
-            print("Exception occured during search on '{}': {}".format(
-                host, e))
-        return []
-    except subprocess.TimeoutExpired:
-        print("Host {} did not reply after {} sec. Ignoring it.".format(
-            host, search_timeout), file=sys.stderr)
-        return []
+    res = search_net(patterns=None, host=host)
+    simulations = json.loads(res)
+    for sim in simulations:
+        sim["host"] = host
+    return simulations
 
 
 def search_global(patterns, verbose=False, exclusive=False, remote_cache=None):
