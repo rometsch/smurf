@@ -251,7 +251,7 @@ def search_remote(args):
     patterns = args[1]
     verbose = args[2]
     exclusive = args[3]
-    res = search_net(patterns=None, host=host)
+    res = search_net(patterns=patterns, host=host)
     simulations = json.loads(res)
     for sim in simulations:
         sim["host"] = host
@@ -259,8 +259,9 @@ def search_remote(args):
 
 
 def search_global(patterns, verbose=False, exclusive=False, remote_cache=None):
-    conf = smurf.Config()
-    hosts = conf["host_list"]
+    from smurfnet.config import Config as NetConfig
+    conf = NetConfig()
+    hosts = [key for key in conf["hosts"]]
     args = [[h, patterns, verbose, exclusive] for h in hosts]
     try:
         from multiprocessing.pool import ThreadPool as Pool
