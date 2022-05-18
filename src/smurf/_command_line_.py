@@ -74,7 +74,7 @@ def available_scripts(filenames=False):
 
 
 def filter_backend_scripts(unfiltered):
-    to_filter = ["simdata_integration", "doublefork"]
+    to_filter = ["doublefork"]
     rv = []
     for s in unfiltered:
         if all([x not in s for x in to_filter]):
