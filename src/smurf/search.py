@@ -145,7 +145,7 @@ def search_net(patterns=None, host="localhost", update=False, action="search"):
         Search results.
     """
     from smurfnet.client import make_request
-    import urllib
+    import urllib.parse
     query = dict(
         pattern=patterns
     )
