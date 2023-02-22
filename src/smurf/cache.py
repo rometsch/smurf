@@ -196,7 +196,10 @@ class DoubleUuidCache(Cache):
         key = self.map_key(key)
         short = key.split("-")[0]
         super().remove(key)
-        del self.key_map[short]
+        try:
+            del self.key_map[short]
+        except KeyError:
+            pass
 
     def is_uuid(self, key):
         """ Check whether a key is a valid uuid. """

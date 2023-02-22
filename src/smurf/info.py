@@ -167,6 +167,9 @@ class Info:
             except AttributeError:
                 pass
         return "\n".join(entries)
+    
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def generate_uuid(self):
         import uuid
