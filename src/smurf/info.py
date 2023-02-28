@@ -43,7 +43,9 @@ def parse_command_line_args():
 
 
 class Info:
-    def __init__(self, path=os.getcwd(), create=False):
+    def __init__(self, path=None, create=False):
+        if path is None:
+            path = os.getcwd()
         self.uuid = ""
         self.name = ""
         self.tags = []
